@@ -1,0 +1,261 @@
+---
+title: "AN588_Zombies_chuhan"
+author: "Lia"
+date: "2023-10-10"
+output: rmdformats::readthedown
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Homework 3
+
+```{r, echo=FALSE, fig.align='center', fig.cap="Zombies|L4D2", out.width="50%"}
+knitr::include_graphics('C:/Users/Anemone/Desktop/BU/2023Fall/BI588/Development/Homework3/AN588_Zombies_chuhan/L4D2.jpg')
+```
+
+Load the packages first. 
+```{r}
+library(curl)
+```
+
+Assign the data to variables. 
+```{r}
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall23/zombies.csv")
+d <- read.csv(f, header=TRUE, sep=",", stringsAsFactors=FALSE)
+head(d)
+```
+
+## Problem 1
+Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
+
+```{r}
+df <- data.frame(d$height, d$weight, d$age, d$zombies_killed, d$years_of_education)
+colMeans(df)
+```
+
+```{r}
+sapply(df, sd)
+```
+
+**Note: **I thought about calculating all of the things one by one with mean(d$variable), but this just make the code long and separated. Therefore instead I used colMeans() and sapply() to assemble all of the result. 
+
+Problem 1 complete :)
+
+## Problem 2
+Use {ggplot} to make boxplots of each of these variables by gender.
+
+```{r}
+library(ggplot2)
+bph <- ggplot(data=d, mapping=aes(x=gender, y=height))+geom_boxplot()+ylab("Height")
+bpw <- ggplot(data=d, mapping=aes(x=gender, y=weight))+geom_boxplot()+ylab("Weight")
+bpa <- ggplot(data=d, mapping=aes(x=gender, y=age))+geom_boxplot()+ylab("Age")
+bpn <- ggplot(data=d, mapping=aes(x=gender, y=zombies_killed))+geom_boxplot()+ylab("# of Zombies Killed")
+bpy <- ggplot(data=d, mapping=aes(x=gender, y=years_of_education))+geom_boxplot()+ylab("Years of Education")
+library(ggpubr)
+BPfigure <- ggarrange(bph, bpw, bpa, bpn, bpy)
+BPfigure
+```
+
+**Note: **I am not sure if these are the boxplots I should be making (am I expected to create 5 boxplots). The graphs took a lot of space and I felt like there is no need to give them so much space to see the plots clearly. Therefore, I combined them to one figure.If I should not be combining them I guess I can just remove the assigning and fuction from the ggpubr packet. 
+
+Problem 2 complete :)
+
+## Problem 3
+Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+
+```{r}
+attach(d)
+par(mfrow=c(1, 2))
+plot(x=age, y=height)
+plot(x=age, y=weight)
+```
+
+```{r}
+detach(d)
+```
+
+**Note: **I won't say that height/weight is not related to age at all, but it is hard for me to justify if their correlation is strong enough to make me say "Yes they are related". In bose cases, height and weight seem to increase as the age increase, and the correlation between height and age seem to be stronger.
+
+Problem 3 complete :)
+
+## Problem 4
+Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
+
+```{r}
+par(mfrow=c(1, 2))
+hist(d$height, main="Height", xlab="Height")
+qqnorm(d$height, main="Height", xlab="Height")
+qqline(d$height, col="lightblue")
+```
+
+```{r}
+par(mfrow=c(1,2))
+hist(d$weight, main="Weight", xlab="Weight")
+qqnorm(d$weight, main="Weight", xlab="Weight")
+qqline(d$weight, col="lightblue")
+```
+
+```{r}
+par(mfrow=c(1,2))
+hist(d$age, main="Age", xlab="Age")
+qqnorm(d$age, main="Age", xlab="Age")
+qqline(d$age, col="lightblue")
+```
+
+```{r}
+par(mfrow=c(1,2))
+hist(d$zombies_killed, main="# of Zombies Killed", xlab="# of Zombies Killed")
+qqnorm(d$zombies_killed, main="# of Zombies Killed", xlab="# of Zombies killed")
+qqline(d$zombies_killed, col="lightblue")
+```
+
+```{r}
+par(mfrow=c(1,2))
+hist(d$years_of_education, main="Years of Education", xlab="Years of Education")
+qqnorm(d$years_of_education, main="Years of Education", xlab="Years of Education")
+qqline(d$years_of_education, col="lightblue")
+```
+
+**Note: **Among these variables, height, weight, and age are normally distributed, while the other two variables are not. 
+
+Problem 4 complete :)
+
+## Problem 5
+Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+
+```{r}
+S <- sample(d$height, size=30, replace=FALSE)
+m <- mean(S)
+sd <- sd(S)
+sde <- sd/sqrt(length(S))
+lower <- m-qnorm(0.975)*sde
+upper <- m+qnorm(0.975)*sde
+ci <- c(lower, upper)
+Height <- c(m, sd, sde, ci)
+
+S <- sample(d$weight, size=30, replace=FALSE)
+m <- mean(S)
+sd <- sd(S)
+sde <- sd/sqrt(length(S))
+lower <- m-qnorm(0.975)*sde
+upper <- m+qnorm(0.975)*sde
+ci <- c(lower, upper)
+Weight <- c(m, sd, sde, ci)
+
+S <- sample(d$age, size=30, replace=FALSE)
+m <- mean(S)
+sd <- sd(S)
+sde <- sd/sqrt(length(S))
+lower <- m-qnorm(0.975)*sde
+upper <- m+qnorm(0.975)*sde
+ci <- c(lower, upper)
+Age <- c(m, sd, sde, ci)
+
+S <- sample(d$zombies_killed, size=30, replace=FALSE)
+m <- mean(S)
+sd <- sd(S)
+sde <- sd/sqrt(length(S))
+lower <- m-qnorm(0.975)*sde
+upper <- m+qnorm(0.975)*sde
+ci <- c(lower, upper)
+ZombiesKilled <- c(m, sd, sde, ci)
+
+S <- sample(d$years_of_education, size=30, replace=FALSE)
+m <- mean(S)
+sd <- sd(S)
+sde <- sd/sqrt(length(S))
+lower <- m-qnorm(0.975)*sde
+upper <- m+qnorm(0.975)*sde
+ci <- c(lower, upper)
+EduYears <- c(m, sd, sde, ci)
+```
+
+```{r}
+CombSampleV <- cbind(Height, Weight, Age, ZombiesKilled, EduYears)
+rownames(CombSampleV) <- c("Mean", "SD", "SE", "Lower CI", "Upper CI")
+CombSampleV
+```
+
+Problem 5 complete :)
+
+## Problem 6
+Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+
+```{r}
+k <- 100
+n <- 30
+s <- NULL
+for (i in 1:k) {
+  s[[i]] <- sample(d$height, size=n, replace=FALSE, prob=NULL)
+}
+m <- mean(s[[i]])
+sd <- sd(s[[i]])
+Height <- c(m, sd)
+hist(s[[i]], main="Height Sample Histogram", xlab="Height")
+```
+
+```{r}
+k <- 100
+n <- 30
+s <- NULL
+for (i in 1:k) {
+  s[[i]] <- sample(d$weight, size=n, replace=FALSE, prob=NULL)
+}
+m <- mean(s[[i]])
+sd <- sd(s[[i]])
+Weight <- c(m, sd)
+hist(s[[i]], main="Weight Sample Histogram", xlab="Weight")
+```
+
+```{r}
+k <- 100
+n <- 30
+s <- NULL
+for (i in 1:k) {
+  s[[i]] <- sample(d$age, size=n, replace=FALSE, prob=NULL)
+}
+m <- mean(s[[i]])
+sd <- sd(s[[i]])
+Age <- c(m, sd)
+hist(s[[i]], main="Age Sample Histogram", xlab="Age")
+```
+
+```{r}
+k <- 100
+n <- 30
+s <- NULL
+for (i in 1:k) {
+  s[[i]] <- sample(d$zombies_killed, size=n, replace=FALSE, prob=NULL)
+}
+m <- mean(s[[i]])
+sd <- sd(s[[i]])
+ZombiesKilled <- c(m, sd)
+hist(s[[i]], main="Number of Zombies Killed Sample Histogram", xlab="Number of Zombies Killed")
+```
+
+```{r}
+k <- 100
+n <- 30
+s <- NULL
+for (i in 1:k) {
+  s[[i]] <- sample(d$years_of_education, size=n, replace=FALSE, prob=NULL)
+}
+m <- mean(s[[i]])
+sd <- sd(s[[i]])
+EduYears <- c(m, sd)
+hist(s[[i]], main="Education Years Sample Histogram", xlab="Years of Education")
+```
+
+```{r}
+CombSampleH <- rbind(Height, Weight, Age, ZombiesKilled, EduYears)
+colnames(CombSampleH) <- c("Mean", "SD")
+CombSampleH
+```
+
+Problem 6 complete :)
+
+***
+
+Homework 3 complet :D
